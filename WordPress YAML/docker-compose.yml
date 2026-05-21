@@ -1,0 +1,68 @@
+version: '3.8'
+
+networks:
+  wp-red:
+    driver: bridge
+
+volumes:
+  mysql-data:
+    driver: local
+  wordpress-data:
+    driver: local
+
+services:
+  #MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-wordpress
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: wordpress_db
+      MYSQL_USER: gabriel
+      MYSQL_PASSWORD: admin
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - wp-red
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  #WordPress
+  wordpress:
+    image: wordpress:latest
+    container_name: wordpress-app
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      WORDPRESS_DB_HOST: mysql:3306
+      WORDPRESS_DB_USER: gabriel
+      WORDPRESS_DB_PASSWORD: admin
+      WORDPRESS_DB_NAME: wordpress_db
+    networks:
+      - wp-red
+    ports:
+      - "8080:80"
+
+  #phpMyAdmin
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phpmyadmin
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+      UPLOAD_LIMIT: 50M
+    networks:
+      - wp-red
+    ports:
+      - "8081:80"
