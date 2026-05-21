@@ -95,7 +95,7 @@ Imágen de la terminal de GitBash:
 
 Imágen del código yml ejecutado:
 
-<img src="./imagenes/evidencia-codigo-yaml.png">
+<img src="./imagenes/evidencia-codigo-yml.png">
 
 Imágen de Wordpress funcionando:
 
